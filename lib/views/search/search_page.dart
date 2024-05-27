@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
@@ -16,6 +17,7 @@ class _SearchPageState extends State<SearchPage> {
   stt.SpeechToText _speech = stt.SpeechToText();
   String _recognizedText = "";
   bool _isListening = false;
+  XFile? selectedImg;
 
   @override
   void initState() {
@@ -75,6 +77,43 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  Future openCamera() async {
+    final image = await ImagePicker().pickImage(source: ImageSource.camera);
+    selectedImg = image;
+    setState(() {});
+
+    if (!mounted) return;
+    Navigator.pop(context);
+  }
+
+  Future openGallery() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    selectedImg = picked;
+    setState(() {});
+
+    if (!mounted) return;
+    Navigator.pop(context);
+  }
+
+  Future<void> pickFromSheet() async {
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text('Choose an option'),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            onPressed: openGallery,
+            child: const Text('Gallery'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: openCamera,
+            child: const Text('Camera'),
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,7 +138,7 @@ class _SearchPageState extends State<SearchPage> {
                   width: 5,
                 ),
                 IconButton(
-                    onPressed: pickImage,
+                    onPressed: pickFromSheet,
                     icon: const Icon(Icons.camera_alt_outlined)),
                 const SizedBox(
                   width: 5,
@@ -127,9 +166,5 @@ class _SearchPageState extends State<SearchPage> {
         ),
       ),
     );
-  }
-
-  Future pickImage() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.camera);
   }
 }
